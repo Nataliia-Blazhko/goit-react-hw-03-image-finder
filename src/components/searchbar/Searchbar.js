@@ -5,26 +5,16 @@ export class Searchbar extends Component {
     value: "",
   };
 
-  submitHandler = (e) => {
-    e.preventDefault();
-    this.props.onSubmit(this.state.value);
-  };
-
-  changeHendler = (e) => {
-    this.setState({ value: e.target.value });
-  };
-
   render() {
     return (
       <header className="Searchbar">
-        <form className="SearchForm" onSubmit={this.submitHandler}>
+        <form className="SearchForm">
           <button type="submit" className="SearchForm-button">
             <span className="SearchForm-button-label">Search</span>
           </button>
 
           <input
-            onChange={this.changeHendler}
-            value={this.state.value}
+            // value={this.state.value}
             className="SearchForm-input"
             type="text"
             autocomplete="off"
