@@ -5,7 +5,7 @@ export default class ImageGalleryItem extends Component {
     return (
       <li className="ImageGalleryItem">
         <img
-        onClick={}
+          onClick={() => this.props.openModal(this.props.largeImageURL)}
           src={this.props.webformatURL}
           alt=""
           className="ImageGalleryItem-image"
