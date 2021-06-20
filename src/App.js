@@ -4,8 +4,8 @@ import { ImageGallery } from "./components/imagegallery/ImageGallery";
 import { Button } from "./components/button/Button";
 import { Modal } from "./components/modal/Modal";
 import "./styles.scss";
-import Loader from "react-loader-spinner";
 import apiService from "./apiService";
+import LoaderSpinner from "./components/loader/LoaderSpinner";
 
 class App extends Component {
   state = {
@@ -15,6 +15,8 @@ class App extends Component {
     page: 1,
     isModalOpen: false,
     fullImageUrl: "",
+    perPage: 12,
+    totalPages: 0,
   };
 
   componentDidMount() {
@@ -37,24 +39,39 @@ class App extends Component {
         };
       },
       () => {
-        apiService.fetchImages(query, this.state.page).then((response) => {
-          this.setState((prevState) => {
-            if (newQuery) {
-              return {
-                images: [...response.data.hits],
-                isLoading: false,
-              };
-            } else {
-              return {
-                images: [...prevState.images, ...response.data.hits],
-                isLoading: false,
-              };
-            }
-          });
-        });
+        query
+          ? apiService
+              .fetchImages(query, this.state.page, this.state.perPage)
+              .then((response) => {
+                this.setState((prevState) => {
+                  if (newQuery) {
+                    return {
+                      images: [...response.data.hits],
+                      isLoading: false,
+                      totalPages: response.data.totalHits / this.state.perPage,
+                    };
+                  } else {
+                    return {
+                      images: [...prevState.images, ...response.data.hits],
+                      isLoading: false,
+                    };
+                  }
+                });
+              })
+          : this.setState({ images: [] });
       }
     );
+    this.scrollTo();
   }
+
+  scrollTo = () => {
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 750);
+  };
 
   searchQuery = (query) => {
     this.updateImages(query, true);
@@ -62,10 +79,6 @@ class App extends Component {
 
   nextPage = () => {
     this.updateImages(this.state.query);
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   };
 
   showFullImage = (fullImage) => () => {
@@ -90,10 +103,12 @@ class App extends Component {
           <Modal open={this.toggleModal} fullImage={this.state.fullImageUrl} />
         )}
 
-        {this.state.isLoading ? (
-          <Loader type="ThreeDots" color="#00BFFF" height={100} width={100} />
+        {this.state.isLoading && this.state.query ? (
+          <LoaderSpinner />
         ) : (
-          <Button nextPage={this.nextPage} />
+          this.state.page <= this.state.totalPages && (
+            <Button nextPage={this.nextPage} />
+          )
         )}
       </>
     );
